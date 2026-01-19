@@ -1,9 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import CarCard from "../components/CarCard";
 import StoriesSearch from "../components/Stories";
-import DealershipList from "../components/DealershipList";
+import RentCarCard from "../components/CarCard";
+import DealershipSlider from "../components/DealershipList";
+
 // Define the Car interface with dealership details
 interface Car {
   id: number;
@@ -234,12 +235,12 @@ const bookCar = (id: string | number) => {
   return (
     <div className="min-h-screen bg-gray-50 pb-28">
       <StoriesSearch />
-      <DealershipList />
+      <DealershipSlider />
       {/* Feed */}
       <main className="max-w-4xl mx-auto mt-6 px-4">
         <div className="grid grid-cols-2 sm:grid-cols-1 gap-2">
           {cars.map((car) => (
-            <CarCard
+            <RentCarCard
               key={car.id}
               car={car}
               onToggleLike={toggleLike}
