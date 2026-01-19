@@ -1,0 +1,89 @@
+:root {
+  color-scheme: light;
+}
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+
+
+/* Base body styling */
+html,
+body {
+  @apply bg-background text-primary font-sans;
+}
+
+
+/* Headings */
+h1, h2, h3, h4, h5, h6 {
+  @apply text-primary font-bold;
+}
+
+/* Paragraphs */
+p {
+  @apply text-gray-700;
+}
+
+/* Links */
+a {
+  @apply text-primary hover:text-secondary transition-colors duration-200;
+}
+
+/* Buttons */
+button {
+  @apply bg-secondary text-white rounded-lg px-4 py-2 font-semibold hover:bg-yellow-400 transition-colors duration-200;
+}
+
+/* Cards / Panels */
+.card {
+  @apply bg-card shadow-lg rounded-xl p-4;
+}
+
+/* Input fields */
+input, textarea, select {
+  @apply border border-gray-300 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-accent focus:border-accent;
+}
+
+/* Header gradient */
+.header-gradient {
+  @apply bg-gradient-to-r from-gradientStart via-gradientMiddle to-gradientEnd;
+}
+
+/* Footer Reels button gradient */
+.reels-gradient {
+  @apply bg-gradient-to-r from-gradientStart via-gradientMiddle to-gradientEnd;
+}
+
+.bg-c-temp {
+  background-color: #f9fafb !important
+}
+
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+@keyframes spinSlow {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-spin-slow {
+  animation: spinSlow 8s linear infinite;
+}
+
+/* Hide scrollbar */
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+.scrollbar-hide {
+  scrollbar-width: none;
+}
