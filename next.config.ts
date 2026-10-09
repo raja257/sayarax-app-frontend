@@ -1,8 +1,8 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
   reactStrictMode: true,
+  output: "standalone",
   images: {
     domains: ['img.freepik.com'], // Add the domain here
   },

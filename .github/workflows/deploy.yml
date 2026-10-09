@@ -1,0 +1,65 @@
+name: Deploy
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: deploy
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+      - run: npm run lint --if-present
+        continue-on-error: true
+      - run: npm run build
+
+      - name: Assemble standalone bundle
+        run: |
+          cp -r .next/static .next/standalone/.next/static
+          cp -r public .next/standalone/public
+          tar czf bundle.tgz -C .next/standalone .
+
+      - name: Set up SSH
+        run: |
+          install -m 700 -d ~/.ssh
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_deploy
+          chmod 600 ~/.ssh/id_deploy
+          ssh-keyscan -H "${{ secrets.SERVER_HOST }}" >> ~/.ssh/known_hosts
+
+      - name: Upload and restart
+        run: |
+          SSH="ssh -i ~/.ssh/id_deploy ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }}"
+          scp -i ~/.ssh/id_deploy bundle.tgz ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }}:/tmp/sayarax-bundle.tgz
+          $SSH 'set -e
+            rm -rf ~/sayarax.new && mkdir ~/sayarax.new
+            tar xzf /tmp/sayarax-bundle.tgz -C ~/sayarax.new
+            rm -rf ~/sayarax.old
+            mv ~/sayarax ~/sayarax.old
+            mv ~/sayarax.new ~/sayarax
+            cd ~/sayarax
+            PORT=8080 HOSTNAME=0.0.0.0 pm2 delete sayarax >/dev/null 2>&1 || true
+            PORT=8080 HOSTNAME=0.0.0.0 pm2 start server.js --name sayarax
+            pm2 save
+            rm -f /tmp/sayarax-bundle.tgz'
+
+      - name: Health check (rollback on failure)
+        run: |
+          SSH="ssh -i ~/.ssh/id_deploy ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }}"
+          sleep 4
+          if ! $SSH 'curl -fsS -o /dev/null localhost:8080'; then
+            echo "Health check failed, rolling back"
+            $SSH 'cd ~ && rm -rf sayarax && mv sayarax.old sayarax && cd sayarax && pm2 delete sayarax; PORT=8080 HOSTNAME=0.0.0.0 pm2 start server.js --name sayarax && pm2 save'
+            exit 1
+          fi
